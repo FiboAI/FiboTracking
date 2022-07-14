@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fibo.cdp.modules.cdp.dao.ModelGroupDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.fibo.cdp.modules.cdp.entity.ModelGroupEntity" id="modelGroupMap">
+        <result property="id" column="id"/>
+        <result property="modelId" column="model_id"/>
+        <result property="propertyEn" column="property_en"/>
+    </resultMap>
+
+    <resultMap id="modelParamsMap" type="cn.fibo.cdp.modules.cdp.entity.param.SubmitGroupPropertyParam">
+        <result property="propertyEn" column="property_en"/>
+        <result property="propertyCn" column="propertyCn"/>
+        <result property="sort" column="sort"/>
+    </resultMap>
+
+
+    <select id="getGroupListByModelId" resultMap="modelParamsMap" parameterType="java.util.Map">
+        select a.property_en,a.sort,b.name_cn propertyCn from t_analysis_model_group a
+        left join t_analysis_metadata_property_data b on b.name_en = a.property_en
+        where a.model_id = #{modelId}
+        order by a.sort asc
+    </select>
+
+</mapper>

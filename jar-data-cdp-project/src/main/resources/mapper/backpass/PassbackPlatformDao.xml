@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fibo.cdp.modules.backpass.dao.PassbackPlatformDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.fibo.cdp.modules.backpass.entity.PassbackPlatformEntity" id="passbackPlatformMap">
+        <result property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="status" column="status"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateUserId" column="update_user_id"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+
+
+    <select id="getListAll" parameterType="java.util.Map" resultType="cn.fibo.cdp.modules.backpass.entity.PassbackPlatformEntity">
+        select a.*,count(1) configCount from t_cdp_passback_platform a
+        left join t_cdp_passback_config b on a.code = b.platform_code
+        ${ew.customSqlSegment}
+    </select>
+
+
+</mapper>

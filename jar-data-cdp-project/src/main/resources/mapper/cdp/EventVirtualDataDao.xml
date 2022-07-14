@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fibo.cdp.modules.cdp.dao.EventVirtualDataDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.fibo.cdp.modules.cdp.entity.EventVirtualDataEntity" id="eventVirtualDataMap">
+        <result property="id" column="id"/>
+        <result property="virtualEventEn" column="virtual_event_en"/>
+        <result property="nameEn" column="name_en"/>
+    </resultMap>
+
+
+    <resultMap id="getVirturalEventDetailParamsMap" type="cn.fibo.cdp.modules.cdp.entity.param.VirturalEventDetailParam">
+        <association property="submitWherePropertyParams" column="{uuid=where_uuid}" select="cn.fibo.cdp.modules.cdp.dao.ModelWhereDao.getWhereParamListByUuid"/>
+    </resultMap>
+    <select id="getVirturalEventDetailParams" parameterType="java.util.Map" resultMap="getVirturalEventDetailParamsMap">
+        select name_en as eventEn,where_uuid from t_analysis_metadata_event_virtual_data
+        where virtual_event_en = #{virtualEventEn}
+    </select>
+
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fibo.cdp.modules.sys.dao.SysMenuDao">
+
+	<resultMap id="resultMap" type="cn.fibo.cdp.modules.sys.entity.SysMenuEntity">
+		<association property="children" column="{parentId=menu_id}" select="queryListParentId"/>
+	</resultMap>
+
+	<select id="queryListParentId" resultType="cn.fibo.cdp.modules.sys.entity.SysMenuEntity">
+		select * from sys_menu where parent_id = #{parentId} order by order_num asc
+	</select>
+
+	<select id="queryAllMenuTreeList" resultMap="resultMap" >
+		select * from sys_menu menu where parent_id=0
+		order by order_num asc
+	</select>
+
+	<select id="queryMenuTreeListByUserId" resultType="cn.fibo.cdp.modules.sys.entity.SysMenuEntity" >
+		select DISTINCT a.* from sys_menu a
+		left join sys_menu aa on FIND_IN_SET(a.menu_id ,aa.long_id)>0
+		left join sys_role_menu b on b.menu_id = aa.menu_id
+		left join sys_user_role c on c.role_id = b.role_id
+		where c.user_id = #{userId}
+		order by a.order_num asc
+	</select>
+
+</mapper>

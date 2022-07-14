@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fibo.cdp.modules.sys.dao.SysUserDao">
+	<!-- 查询用户的所有权限 -->
+	<select id="queryAllPerms" resultType="string">
+		select m.perms from sys_user_role ur
+			LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id
+			LEFT JOIN sys_menu m on rm.menu_id = m.menu_id
+		where ur.user_id = #{userId}
+	</select>
+
+	<!-- 查询用户的所有菜单ID -->
+	<select id="queryAllMenuId" resultType="long">
+		select distinct rm.menu_id from sys_user_role ur
+			LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id
+		where ur.user_id = #{userId}
+	</select>
+
+	<select id="queryByUserName" resultType="cn.fibo.cdp.modules.sys.entity.SysUserEntity">
+		select * from sys_user where username = #{username} and del_flag =0
+	</select>
+
+	<select id="selectUserList" parameterType="java.util.Map" resultType="cn.fibo.cdp.modules.sys.entity.SysUserEntity">
+		select a.*,GROUP_CONCAT(c.role_name) roleName from sys_user a
+		left join sys_user_role b on a.user_id = b.user_id
+		left join sys_role c on c.role_id = b.role_id
+		${ew.customSqlSegment}
+	</select>
+
+</mapper>

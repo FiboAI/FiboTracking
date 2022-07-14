@@ -1,0 +1,7 @@
+/h5-cdp/node_modules/
+/jar-data-cdp-project/logs/
+/jar-data-cdp-project/target/
+/jar-data-flink-analysis/target/
+/jar-data-flume-interceptor/target/
+/h5-cdp/.vscode/
+/h5-cdp/dist/

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fibo.cdp.modules.cdp.dao.ModelWhereDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.fibo.cdp.modules.cdp.entity.ModelWhereEntity" id="modelWhereMap">
+        <result property="id" column="id"/>
+        <result property="uuid" column="uuid"/>
+        <result property="propertyEn" column="property_en"/>
+        <result property="conditions" column="conditions"/>
+        <result property="value" column="value"/>
+        <result property="sort" column="sort"/>
+    </resultMap>
+
+
+    <select id="getWhereListByUuid" resultMap="modelWhereMap" parameterType="java.util.Map">
+        select * from t_analysis_model_where where uuid = #{uuid}
+    </select>
+
+    <resultMap id="modelParamsMap" type="cn.fibo.cdp.modules.cdp.entity.param.SubmitWherePropertyParam">
+        <result property="propertyEn" column="property_en"/>
+        <result property="conditions" column="conditions"/>
+        <result property="value" column="value"/>
+        <result property="sort" column="sort"/>
+    </resultMap>
+
+
+    <select id="getWhereParamListByUuid" resultMap="modelParamsMap" parameterType="java.util.Map">
+        select a.property_en,a.conditions,a.value,a.sort,a.max_value,b.field_type from t_analysis_model_where a
+        left join t_analysis_metadata_property_data b on b.name_en = a.property_en
+        where a.uuid = #{uuid}
+        order by a.sort asc
+    </select>
+</mapper>

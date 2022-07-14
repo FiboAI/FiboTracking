@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fibo.cdp.modules.cdp.dao.KeepDataDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.fibo.cdp.modules.cdp.entity.KeepDataEntity" id="keepDataMap">
+        <result property="id" column="id"/>
+        <result property="startEvent" column="start_event"/>
+        <result property="endEvent" column="end_event"/>
+        <result property="startWhereUuid" column="start_where_uuid"/>
+        <result property="endWhereUuid" column="end_where_uuid"/>
+        <result property="modelId" column="model_id"/>
+    </resultMap>
+
+    <resultMap id="keepDataParamMap" type="cn.fibo.cdp.modules.cdp.entity.param.SubmitKeepEventParam">
+        <association property="firstWherePropertyParamList" column="{uuid=start_where_uuid}" select="cn.fibo.cdp.modules.cdp.dao.ModelWhereDao.getWhereParamListByUuid"/>
+        <association property="lastWherePropertyParamList" column="{uuid=end_where_uuid}" select="cn.fibo.cdp.modules.cdp.dao.ModelWhereDao.getWhereParamListByUuid"/>
+    </resultMap>
+
+
+
+    <select id="getKeepStartEventByModelId" resultMap="keepDataParamMap" parameterType="java.util.Map">
+        select a.start_event firstEventEn,
+             a.end_event lastEventEn,
+             b.is_virtual firstIsVirtual,
+             c.is_virtual lastIsVirtual,
+             a.start_where_uuid,a.end_where_uuid
+        from t_analysis_keep_data a
+        left join t_analysis_metadata_event_data b on b.name_en = a.start_event
+        left join t_analysis_metadata_event_data c on c.name_en = a.end_event
+        where a.model_id = #{modelId}
+    </select>
+
+</mapper>

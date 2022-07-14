@@ -1,0 +1,66 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "useDefineForClassFields": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": "./",
+    "allowSyntheticDefaultImports": true,
+    "lib": [
+      "webworker",
+      "esnext",
+      "dom"
+    ],
+    "types": [
+      "vite/client"
+    ],
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "_apis/*": [
+        "src/apis/*"
+      ],
+      "_style/*": [
+        "src/assets/styles/*"
+      ],
+      "_utils/*": [
+        "src/utils/*"
+      ],
+      "_types/*": [
+        "src/types/*"
+      ],
+      "_components/*": [
+        "src/components/*"
+      ],
+      "_hooks/*": [
+        "src/hooks/*"
+      ],
+      "_stores/*": [
+        "src/stores/*"
+      ],
+      "_workers/*": [
+        "src/workers/*"
+      ]
+    },
+  },
+  "include": [
+    "src/**/*.js",
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}

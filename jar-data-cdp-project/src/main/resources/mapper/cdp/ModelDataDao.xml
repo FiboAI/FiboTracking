@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fibo.cdp.modules.cdp.dao.ModelDataDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.fibo.cdp.modules.cdp.entity.ModelDataEntity" id="modelDataMap">
+        <result property="id" column="id"/>
+        <result property="type" column="type"/>
+        <result property="name" column="name"/>
+        <result property="timeGranularity" column="time_granularity"/>
+        <result property="timeValue" column="time_value"/>
+        <result property="chartType" column="chart_type"/>
+        <result property="whereUuid" column="where_uuid"/>
+        <result property="isAvg" column="is_avg"/>
+        <result property="isSum" column="is_sum"/>
+        <result property="isYearToYear" column="is_year_to_year"/>
+        <result property="windowSize" column="window_size"/>
+        <result property="status" column="status"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateUserId" column="update_user_id"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="overviewId" column="overview_id"/>
+        <result property="calcType" column="calc_type"/>
+        <result property="sort" column="sort"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+    </resultMap>
+
+    <!--事件分析删除与该事件分析关联的select、group、where-->
+    <delete id="deleteEventModelData" parameterType="java.lang.Long">
+        delete a from  t_analysis_model_where a
+        inner join t_analysis_model_data b on a.uuid = b.where_uuid
+        where b.id = #{modelId};
+
+        delete a from t_analysis_model_group a
+        inner join t_analysis_model_data b on b.id = a.model_id
+        where b.id = #{modelId};
+
+        delete a from t_analysis_model_select a
+        inner join t_analysis_model_data b on b.id = a.model_id
+        where b.id = #{modelId};
+
+        delete a from t_analysis_keep_data a
+        inner join t_analysis_model_data b on b.id = a.model_id
+        where b.id = #{modelId};
+
+        delete a from t_analysis_model_where a
+        inner join t_analysis_keep_data b on a.uuid = b.start_where_uuid or a.uuid = b.end_where_uuid
+        where b.model_id = #{modelId};
+
+        delete a from t_analysis_metadata_customsql_data a
+        inner join t_analysis_model_data b on b.id = a.model_id
+        where b.id = #{modelId};
+
+    </delete>
+    <resultMap id="modelEventResultMap" type="cn.fibo.cdp.modules.cdp.entity.param.SubmitModelAnalysisParam">
+        <association property="selectPropertyParams" column="{modelId=id}" select="cn.fibo.cdp.modules.cdp.dao.ModelSelectDao.getSelectListByModelId"/>
+        <association property="wherePropertyParams" column="{uuid=where_uuid}" select="cn.fibo.cdp.modules.cdp.dao.ModelWhereDao.getWhereParamListByUuid"/>
+        <association property="groupPropertyParams" column="{modelId=id}" select="cn.fibo.cdp.modules.cdp.dao.ModelGroupDao.getGroupListByModelId"/>
+        <association property="keepEventParam" column="{modelId=id}" select="cn.fibo.cdp.modules.cdp.dao.KeepDataDao.getKeepStartEventByModelId"/>
+        <association property="funnelDataEntity" column="{funnelId=funnel_id}" select="cn.fibo.cdp.modules.cdp.dao.FunnelDataDao.getDetail"/>
+        <association property="metadataCustomsqlData" column="{modelId=id}" select="cn.fibo.cdp.modules.cdp.dao.MetadataCustomsqlDataDao.getDetailById"/>
+    </resultMap>
+    <select id="getModelEventDetail" resultMap="modelEventResultMap" parameterType="java.lang.Long">
+        select * from t_analysis_model_data
+        where id = #{modelId}
+    </select>
+</mapper>
