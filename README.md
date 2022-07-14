@@ -21,6 +21,7 @@ SDK埋点SDK采用神策数据开源的SDK，采集行为数据来源终端包�
 对于Nginx打印到文件的日志，会由Flume的 Source 模块来实时读取Nginx日志，
 并由Channel模块进行数据处理，最终通过Sink模块将处理结果发布到 Kafka中。使用Flink消费Kafka将数据插入到Clickhouse中
 
+<img src="https://raw.iqiq.io/FiboAI/FiboTracking/main/image/server.png">
 
 ### 数据分析
 
