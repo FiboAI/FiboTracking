@@ -67,3 +67,6 @@ SDK埋点SDK采用神策数据开源的SDK，采集行为数据来源终端包�
 ### 7)数据回传（后端-暂未实现）
 
 对接巨量引擎匹配数据回传策略，进行回传数据。
+
+### 加官方微信号，进开源交流群
+<img src="https://raw.iqiq.io/FiboAI/FiboTracking/main/image/qrcode.jpg">
