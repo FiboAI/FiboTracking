@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fibo.cdp.modules.cdp.dao.FunnelDataDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.fibo.cdp.modules.cdp.entity.FunnelDataEntity" id="funnelDataMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="windowPeriod" column="window_period"/>
+        <result property="status" column="status"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateUserId" column="update_user_id"/>
+        <result property="updateTime" column="update_time"/>
+        <association property="funnelStepDataEntityList" column="{funnelId=id}" select="cn.fibo.cdp.modules.cdp.dao.FunnelStepDataDao.getFunnelStepDataEntityList"/>
+    </resultMap>
+
+    <!-- 漏斗配置，删除与该漏斗关联的漏斗步骤及步骤对应的筛选条件 -->
+    <delete id="deleteFunnelStepByFunnelId" parameterType="java.lang.Long">
+        delete a from t_analysis_funnel_step_data a
+        inner join t_analysis_funnel_data b on a.funnel_id = b.id
+        where b.id = #{funnelId};
+
+        delete a from t_analysis_model_where a
+        inner join t_analysis_funnel_step_data b on a.uuid = b.where_uuid
+        where b.id = #{funnelId};
+    </delete>
+
+    <resultMap id="funnelDetailMap" type="cn.fibo.cdp.modules.cdp.entity.FunnelDataEntity">
+        <association property="funnelStepDataEntityList" column="id" select="funnelStepDataByFunnelId"/>
+    </resultMap>
+
+    <resultMap id="funnelDetailStepMap" type="cn.fibo.cdp.modules.cdp.entity.FunnelStepDataEntity">
+        <association property="wherePropertyParams" column="{uuid=where_uuid}" select="cn.fibo.cdp.modules.cdp.dao.ModelWhereDao.getWhereListByUuid"/>
+        <association property="virturalEventDetailParams" column="{virtualEventEn=event_en}" select="cn.fibo.cdp.modules.cdp.dao.EventVirtualDataDao.getVirturalEventDetailParams"/>
+    </resultMap>
+
+
+    <select id="funnelStepDataByFunnelId" resultMap="funnelDetailStepMap">
+        select
+               *
+               from t_analysis_funnel_step_data where funnel_id = #{id}
+        order by sort asc
+    </select>
+    <select id="getDetail" resultMap="funnelDetailMap">
+        select
+        id,name,window_period
+        from t_analysis_funnel_data where id = #{funnelId}
+    </select>
+
+
+    <select id="getList"  resultMap="funnelDataMap">
+        select * from t_analysis_funnel_data
+        ${ew.customSqlSegment}
+    </select>
+</mapper>

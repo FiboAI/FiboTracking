@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fibo.cdp.modules.cdp.dao.ClickhouseBaseDao">
+
+    <select id="execSql" resultType="java.util.LinkedHashMap">
+        ${sql}
+    </select>
+
+    <select id="getYearToYearValue" parameterType="java.util.Map" resultType="java.math.BigDecimal">
+        select ${function} as value
+        from events temp0
+            ${whereSQL}
+    </select>
+
+    <!--    -->
+    <select id="execStandardSql" parameterType="java.util.Map" resultType="java.util.Map">
+        select
+        ${selectSQL}
+        from ${tableName} as ${tableAliasName}
+
+        <if test="whereSQL!=null and whereSQL!=''">
+            <where>
+                ${whereSQL}
+            </where>
+        </if>
+        <if test="groupBySQL!=null and groupBySQL!=''">
+            group by ${groupBySQL}
+        </if>
+        <if test="orderBySQL!=null and orderBySQL!=''">
+            order by ${orderBySQL}
+        </if>
+    </select>
+
+    <sql id="funnelIsNowDate">
+        <if test="isNow!=null and isNow==1 ">
+            ,dates
+        </if>
+    </sql>
+
+    <select id="getFunnelUserCount" parameterType="java.util.Map" resultType="java.util.Map">
+        select level_index, count() numbers
+        <include refid="funnelIsNowDate"/>
+        from (SELECT
+        arrayJoin(arrayEnumerate(levels)) level_index
+        <include refid="funnelIsNowDate"/>
+        FROM (
+        SELECT arrayWithConstant(windowFunnel(${window})(toDateTime(`${timeField}`),${conds}), 1) levels
+        <if test="isNow!=null and isNow==1 ">
+            ,date(flume_time) dates
+        </if>
+        FROM (
+            select flume_time,user_id,event
+                   <if test="selectSQL!=null">
+                       ,${selectSQL}
+                   </if>
+                    from events tb
+            <where>
+                ${whereSQL}
+                <foreach collection="arrays" item="item" open="and event in (" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </where>
+        )
+        GROUP BY user_id
+        <include refid="funnelIsNowDate"/>
+        )
+        )
+        group by level_index
+        <if test="isNow!=null and isNow==1 ">
+            ,dates
+        </if>
+    </select>
+
+    <!--留存-->
+    <select id="getKeepDataUserCount" parameterType="java.util.Map" resultType="java.util.Map">
+        select
+            formatDateTime(date(base_date),'${dbDateFormat}') dates
+            <if test="groupSelectSQL!=null and groupSelectSQL!=''">
+                ${groupSelectSQL}
+            </if>,
+        uniqExact(uid) total,
+        <if test="timeGranularity == 'day'">
+        date(NOW()) nows,
+        </if>
+        <if test="timeGranularity == 'month'">
+            date(formatDateTime(NOW(),'${dbDateFormat}-01')) nows,
+        </if>
+        sum(case when datediff = 0 then 1 else 0 end) morrow0,
+        <if test="timeGranularity == 'day'">
+            addDays(date(base_date), 1)>nows isGreat1,
+        </if>
+        <if test="timeGranularity == 'month'">
+            addMonths(date(base_date), 1)>nows isGreat1,
+        </if>
+        if(isGreat1=0,toString(sum(case WHEN datediff = 1 THEN 1 ELSE 0 end)),'') morrow1
+        <if test="timeValue!=null">
+            <if test="timeValue>=2">
+                <if test="timeGranularity == 'day'">
+                   ,addDays(date(base_date), 2)>nows isGreat2
+                </if>
+                <if test="timeGranularity == 'month'">
+                   ,addMonths(date(base_date), 2)>nows isGreat2
+                </if>
+                ,if(isGreat2=0,toString(sum(case WHEN datediff = 2 THEN 1 ELSE 0 end)),'') morrow2
+            </if>
+            <if test="timeValue>=3">
+                <if test="timeGranularity == 'day'">
+                    ,addDays(date(base_date), 3)>nows isGreat3
+                </if>
+                <if test="timeGranularity == 'month'">
+                    ,addMonths(date(base_date), 3)>nows isGreat3
+                </if>
+                ,if(isGreat3=0,toString(sum(case WHEN datediff = 3 THEN 1 ELSE 0 end)),'') morrow3
+            </if>
+            <if test="timeValue>=4">
+                <if test="timeGranularity == 'day'">
+                    ,addDays(date(base_date), 4)>nows isGreat4
+                </if>
+                <if test="timeGranularity == 'month'">
+                    ,addMonths(date(base_date), 4)>nows isGreat4
+                </if>
+                ,if(isGreat4=0,toString(sum(case WHEN datediff = 4 THEN 1 ELSE 0 end)),'') morrow4
+            </if>
+            <if test="timeValue>=5">
+                <if test="timeGranularity == 'day'">
+                    ,addDays(date(base_date), 5)>nows isGreat5
+                </if>
+                <if test="timeGranularity == 'month'">
+                    ,addMonths(date(base_date), 5)>nows isGreat5
+                </if>
+                ,if(isGreat5=0,toString(sum(case WHEN datediff = 5 THEN 1 ELSE 0 end)),'') morrow5
+            </if>
+            <if test="timeValue>=6">
+                <if test="timeGranularity == 'day'">
+                    ,addDays(date(base_date), 6)>nows isGreat6
+                </if>
+                <if test="timeGranularity == 'month'">
+                    ,addMonths(date(base_date), 6)>nows isGreat6
+                </if>
+                ,if(isGreat6=0,toString(sum(case WHEN datediff = 6 THEN 1 ELSE 0 end)),'') morrow6
+            </if>
+            <if test="timeValue>=7">
+                <if test="timeGranularity == 'day'">
+                    ,addDays(date(base_date), 7)>nows isGreat7
+                </if>
+                <if test="timeGranularity == 'month'">
+                    ,addMonths(date(base_date), 7)>nows isGreat7
+                </if>
+                ,if(isGreat7=0,toString(sum(case WHEN datediff = 7 THEN 1 ELSE 0 end)),'') morrow7
+            </if>
+        </if>
+        from
+        (
+        select
+        uid,
+        base_date,
+        retention_date,
+        if(retention_date='',-1,dateDiff('${timeGranularity}',date(base_date),date(retention_date))) datediff
+        <if test="groupSelectSQL!=null and groupSelectSQL!=''">
+            ${groupSelectSQL}
+        </if>
+        from
+        (
+        select
+        distinct user_id uid
+         <if test="timeGranularity!=null and timeGranularity != ''">
+             <if test="timeGranularity == 'day'">
+                 ,formatDateTime(flume_time,'${dbDateFormat}') base_date
+             </if>
+            <if test="timeGranularity == 'month'">
+                ,formatDateTime(flume_time,'${dbDateFormat}-01') base_date
+            </if>
+         </if>
+        <if test="groupSelectSQL!=null and groupSelectSQL!=''">
+            ${groupSelectSQL}
+        </if>
+        from
+        events tb
+        where
+        flume_time between '${startTime}' and '${endTime}' ${firstWhereSQL}
+        group by
+        uid, base_date
+        <if test="groupBySQL!=null and groupBySQL!=''">
+            ${groupBySQL}
+        </if>
+        order by uid asc
+        ) a
+        left join
+        (
+        select
+        distinct user_id uid
+        <if test="timeGranularity!=null and timeGranularity != ''">
+            <if test="timeGranularity == 'day'">
+                ,formatDateTime(flume_time,'${dbDateFormat}') retention_date
+            </if>
+            <if test="timeGranularity == 'month'">
+                ,formatDateTime(flume_time,'${dbDateFormat}-01') retention_date
+            </if>
+        </if>
+        from
+        events tb2
+        where
+        flume_time &gt;= '${startTime}' ${lastWhereSQL}
+        group by
+        uid, retention_date
+        ) b
+        on
+        a.uid = b.uid
+        where
+        base_date &lt;= retention_date or retention_date=''
+        order by
+        base_date asc,uid
+        ) c
+            group by base_date
+            <if test="groupBySQL!=null and groupBySQL!=''">
+                ${groupBySQL}
+            </if>
+            order by base_date
+    </select>
+
+    <select id="getKeepDataTotalUserCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT count(DISTINCT user_id) counts
+        FROM events tb
+        WHERE flume_time
+            BETWEEN #{startTime}
+            AND #{endTime}
+          ${firstWhereSQL}
+    </select>
+
+
+</mapper>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fibo.cdp.modules.backpass.dao.PassbackRecordDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.fibo.cdp.modules.backpass.entity.PassbackRecordEntity" id="passbackRecordMap">
+        <result property="id" column="id"/>
+        <result property="clickid" column="clickid"/>
+        <result property="pushData" column="push_data"/>
+        <result property="oldData" column="old_data"/>
+        <result property="passbackType" column="passback_type"/>
+        <result property="configName" column="config_name"/>
+        <result property="configId" column="config_id"/>
+        <result property="status" column="status"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+
+</mapper>

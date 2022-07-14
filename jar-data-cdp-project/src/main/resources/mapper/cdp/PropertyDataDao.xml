@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--suppress ALL -->
+<mapper namespace="cn.fibo.cdp.modules.cdp.dao.PropertyDataDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.fibo.cdp.modules.cdp.entity.PropertyDataEntity" id="propertyDataMap">
+        <result property="id" column="id"/>
+        <result property="nameCn" column="name_cn"/>
+        <result property="nameEn" column="name_en"/>
+        <result property="fieldType" column="field_type"/>
+        <result property="status" column="status"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateUserId" column="update_user_id"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="getEventPropertyList" resultType="cn.fibo.cdp.modules.cdp.entity.dto.EventPropertyDto">
+        select DISTINCT pd.id propertyId,pd.name_cn,pd.name_en,pd.remarks,pd.field_type
+        from t_analysis_metadata_property_data pd
+                 left join t_analysis_metadata_event_property_rel pr on pd.name_en = pr.property_en
+        where (pr.event_en = #{eventEn} or pr.event_en in (
+            select name_en from t_analysis_metadata_event_virtual_data
+            where virtual_event_en = #{eventEn}
+        )) and pd.del_flag = 0 and pd.status = 0
+    </select>
+    <select id="getAllPropertyList" resultType="cn.fibo.cdp.modules.cdp.entity.dto.EventPropertyDto">
+        select pd.id propertyId,pd.name_cn,pd.name_en,pd.remarks,pd.field_type
+        from t_analysis_metadata_property_data pd
+        ${ew.customSqlSegment}
+    </select>
+
+    <select id="getPropertyListByEventId" resultType="cn.fibo.cdp.modules.cdp.entity.PropertyDataEntity">
+        select * from t_analysis_metadata_property_data a
+        left join t_analysis_metadata_event_property_rel b on b.property_en = a.name_en
+        where b.event_en = #{eventEn}
+    </select>
+
+
+</mapper>

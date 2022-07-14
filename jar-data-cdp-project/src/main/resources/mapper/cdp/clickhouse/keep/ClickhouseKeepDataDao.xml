@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fibo.cdp.modules.cdp.dao.clickhouse.keep.ClickhouseKeepDataDao">
+    <!--留存-->
+    <select id="getKeepDataUserCount" parameterType="java.util.Map" resultType="java.util.Map">
+        select
+        formatDateTime(date(base_date),'${dbDateFormat}') dates
+        <if test="groupSelectSQL!=null and groupSelectSQL!=''">
+            ${groupSelectSQL}
+        </if>,
+        uniqExact(uid) total,
+        <if test="timeGranularity == 'day'">
+            date(NOW()) nows,
+        </if>
+        <if test="timeGranularity == 'month'">
+            date(formatDateTime(NOW(),'${dbDateFormat}-01')) nows,
+        </if>
+        <foreach collection="timeValueArray" index="index" separator=",">
+            <if test="timeGranularity == 'day'">
+                addDays(date(base_date), ${index})>nows isGreat${index},
+            </if>
+            <if test="timeGranularity == 'month'">
+                addMonths(date(base_date), ${index})>nows isGreat${index},
+            </if>
+                if(isGreat${index}=0,toString(sum(case WHEN datediff = ${index} THEN 1 ELSE 0 end)),'') morrow${index},
+                if(morrow${index}!='',if(total=0,'0',toString(round(toInt64(morrow${index})/total,2))),'') rate_morrow${index}
+        </foreach>
+        from
+        (
+        select
+        uid,
+        base_date,
+        retention_date,
+        if(retention_date='',-1,dateDiff('${timeGranularity}',date(base_date),date(retention_date))) datediff
+        <if test="groupSelectSQL!=null and groupSelectSQL!=''">
+            ${groupSelectSQL}
+        </if>
+        from
+        (
+        select
+        distinct user_id uid
+        <if test="timeGranularity!=null and timeGranularity != ''">
+            <if test="timeGranularity == 'day'">
+                ,formatDateTime(flume_time,'${dbDateFormat}') base_date
+            </if>
+            <if test="timeGranularity == 'month'">
+                ,formatDateTime(flume_time,'${dbDateFormat}-01') base_date
+            </if>
+        </if>
+        <if test="groupSelectSQL!=null and groupSelectSQL!=''">
+            ${groupSelectSQL}
+        </if>
+        from
+        events tb
+        where
+        flume_time between '${startTime}' and '${endTime}' ${firstWhereSQL}
+        group by
+        uid, base_date
+        <if test="groupBySQL!=null and groupBySQL!=''">
+            ${groupBySQL}
+        </if>
+        order by uid asc
+        ) a
+        left join
+        (
+        select
+        distinct user_id uid
+        <if test="timeGranularity!=null and timeGranularity != ''">
+            <if test="timeGranularity == 'day'">
+                ,formatDateTime(flume_time,'${dbDateFormat}') retention_date
+            </if>
+            <if test="timeGranularity == 'month'">
+                ,formatDateTime(flume_time,'${dbDateFormat}-01') retention_date
+            </if>
+        </if>
+        from
+        events tb2
+        where
+        flume_time &gt;= '${startTime}' ${lastWhereSQL}
+        group by
+        uid, retention_date
+        ) b
+        on
+        a.uid = b.uid
+        where
+        (base_date &lt;= retention_date or retention_date='') and datediff &lt;=${timeValue}
+        order by
+        base_date asc,uid
+        ) c
+        group by base_date
+        <if test="groupBySQL!=null and groupBySQL!=''">
+            ${groupBySQL}
+        </if>
+        order by base_date
+    </select>
+
+    <!--  总体查询  -->
+    <select id="getKeepDataTotalUserCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT uniqExact(user_id) total
+        FROM events tb
+        WHERE flume_time
+                  BETWEEN #{startTime}
+                  AND #{endTime}
+                ${firstWhereSQL}
+    </select>
+
+
+    <!-- 分组查询每个分组的访问起始行为的去重总人数,用户若在不同分组，则归类到第一次触发起始行为的分组   -->
+    <select id="getKeepDataTotalUserCountByGroup" parameterType="java.util.Map" resultType="java.util.Map">
+        select  uniqExact(user_id) total ${groupSelectSQL}  from events  event1
+        left join
+        (
+        select user_id userId,min(flume_time) flumeTime  from events e2
+        WHERE flume_time
+                  BETWEEN #{startTime}
+                  AND #{endTime}
+                ${firstWhereSQL}
+        group by user_id
+        ) event2 on event1.user_id = event2.userId and event1.flume_time = event2.flumeTime
+        where  event2.flumeTime
+                  BETWEEN #{startTime}
+          AND #{endTime}
+            ${firstWhereSQL}
+        group by ${groupBySQL}
+    </select>
+
+    <!-- 分组查询每个分组的未来日期留存人数,用户若在不同分组，则归类到第一次触发起始行为的分组   -->
+    <select id="getKeepDataRetentionUserCountGroup" parameterType="java.util.Map" resultType="java.util.Map">
+        select datediff,uniqExact(uid) total ${groupSelectSQL} from (SELECT uid,
+        if(retention_date='',-1,dateDiff('${timeGranularity}',date(base_date),date(retention_date))) datediff
+        <if test="groupSelectSQL!=null and groupSelectSQL!=''">
+            ${groupSelectSQL}
+        </if>
+        FROM
+        (
+        SELECT DISTINCT user_id uid
+        <if test="timeGranularity!=null and timeGranularity != ''">
+            <if test="timeGranularity == 'day'">
+                ,formatDateTime(flume_time,'${dbDateFormat}') base_date
+            </if>
+            <if test="timeGranularity == 'month'">
+                ,formatDateTime(flume_time,'${dbDateFormat}-01') base_date
+            </if>
+        </if>
+        <if test="groupSelectSQL!=null and groupSelectSQL!=''">
+            ${groupSelectSQL}
+        </if>
+        FROM events event1
+        left join
+        (
+        select user_id userId,min(flume_time) flumeTime  from events e2
+        WHERE
+        flume_time between '${startTime}' and '${endTime}' ${firstWhereSQL}
+        group by user_id
+        ) event2 on event1.user_id = event2.userId and event1.flume_time = event2.flumeTime
+        where
+        event2.flumeTime between '${startTime}' and '${endTime}' ${firstWhereSQL}
+        GROUP BY  uid, base_date
+        <if test="groupBySQL!=null and groupBySQL!=''">
+        ${groupBySQL}
+        </if>
+        ORDER BY  uid ASC
+        ) a
+        LEFT JOIN
+        (SELECT DISTINCT user_id uid
+        <if test="timeGranularity!=null and timeGranularity != ''">
+            <if test="timeGranularity == 'day'">
+                ,formatDateTime(flume_time,'${dbDateFormat}') retention_date
+            </if>
+            <if test="timeGranularity == 'month'">
+                ,formatDateTime(flume_time,'${dbDateFormat}-01') retention_date
+            </if>
+        </if>
+        FROM events tb2
+        WHERE flume_time >= '${startTime}'
+        ${lastWhereSQL}
+        GROUP BY  uid, retention_date ) b
+        ON a.uid = b.uid
+        WHERE (base_date &lt;= retention_date
+        OR retention_date='') and datediff&lt;=${timeValue} and datediff>=0
+        ORDER BY  base_date asc,uid ) group by datediff
+        <if test="groupBySQL!=null and groupBySQL!=''">
+        ${groupBySQL}
+    </if>
+    </select>
+
+
+
+
+</mapper>

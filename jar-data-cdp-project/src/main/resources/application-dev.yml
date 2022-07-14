@@ -1,0 +1,57 @@
+spring:
+    datasource:
+        type: com.alibaba.druid.pool.DruidDataSource
+        druid:
+            driver-class-name: com.mysql.cj.jdbc.Driver
+            url: jdbc:mysql://127.0.0.1:3306/cdp-project?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+            username: root
+            password: 123456
+            initial-size: 10
+            max-active: 100
+            min-idle: 10
+            max-wait: 60000
+            pool-prepared-statements: true
+            max-pool-prepared-statement-per-connection-size: 20
+            time-between-eviction-runs-millis: 60000
+            min-evictable-idle-time-millis: 300000
+            #Oracle需要打开注释
+            #validation-query: SELECT 1 FROM DUAL
+            test-while-idle: true
+            test-on-borrow: false
+            test-on-return: false
+            stat-view-servlet:
+                enabled: true
+                url-pattern: /druid/*
+                #login-username: admin
+                #login-password: admin
+            filter:
+                stat:
+                    log-slow-sql: true
+                    slow-sql-millis: 1000
+                    merge-sql: false
+                wall:
+                    config:
+                        multi-statement-allow: true
+                        none-base-statement-allow: true
+            db-type: mysql
+    redis:
+        open: true  # 是否开启redis缓存  true开启   false关闭
+        database: 0
+        host: 127.0.0.1
+        port: 6379
+        password: 123456    # 密码（默认为空）
+        timeout: 60000ms  # 连接超时时长（毫秒）
+##多数据源的配置
+dynamic:
+  datasource:
+    clickhouse:
+      driver-class-name: ru.yandex.clickhouse.ClickHouseDriver
+      url: jdbc:clickhouse://127.0.0.1:8123/tracking
+      db-type: clickhouse
+      username: root
+      password: 123456
+#    slave2:
+#      driver-class-name: org.postgresql.Driver
+#      url: jdbc:postgresql://localhost:5432/cdp_security
+#      username: cdp
+#      password: 123456

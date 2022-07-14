@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fibo.cdp.modules.cdp.dao.MetadataCustomsqlDataDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.fibo.cdp.modules.cdp.entity.MetadataCustomsqlDataEntity" id="metadataCustomsqlDataMap">
+        <result property="id" column="id"/>
+        <result property="querySql" column="query_sql"/>
+        <result property="params" column="params"/>
+        <result property="modelId" column="model_id"/>
+    </resultMap>
+
+
+
+    <select id="getDetailById" parameterType="java.util.Map" resultType="cn.fibo.cdp.modules.cdp.entity.MetadataCustomsqlDataEntity">
+        select * from t_analysis_metadata_customsql_data
+        where model_id = #{modelId}
+    </select>
+
+</mapper>
