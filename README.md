@@ -31,6 +31,7 @@ SDK埋点SDK采用神策数据开源的SDK，采集行为数据来源终端包�
 事件，是追踪或记录的用户行为或业务过程。举例来说，一个电商产品可能包含如下事件：用户注册、浏览商品、添加购物车、支付订单等。
 事件分析，是指基于事件的指标统计、属性分组、条件筛选等功能的查询分析。
 
+<img src="https://raw.iqiq.io/FiboAI/FiboTracking/main/image/event.png">
 
 #### 2)漏斗分析
 
@@ -42,11 +43,14 @@ SDK埋点SDK采用神策数据开源的SDK，采集行为数据来源终端包�
 
 可以将如上流程设置为一个漏斗，分析整体的转化情况
 
+<img src="https://raw.iqiq.io/FiboAI/FiboTracking/main/image/funnel.png">
+
 
 #### 3)留存分析
 
 留存分析是一种用来分析用户参与情况/活跃程度的分析模型，考查进行初始行为后的用户中，有多少人会进行后续行为。这是衡量产品对用户价值高低的重要指标。
 
+<img src="https://raw.iqiq.io/FiboAI/FiboTracking/main/image/Keep.png">
 
 ### 4)画像分析
 
