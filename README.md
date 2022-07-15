@@ -25,6 +25,7 @@ SDK埋点SDK采用神策数据开源的SDK，采集行为数据来源终端包�
 
 ### 数据分析
 
+<img src="https://raw.iqiq.io/FiboAI/FiboTracking/main/image/index.png">
 
 #### 1)事件分析
 
